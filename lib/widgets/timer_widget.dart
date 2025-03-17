@@ -4,11 +4,10 @@ import 'package:focusplus/widgets/trace_widget.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 
-
+import '../models/timer_model.dart';
 
 class TimerWidget extends StatefulWidget {
-  // int initialTime = 1500;
-  int initialTime = 10;
+  int initialTime = 15;
 
   @override
   _TimerWidgetState createState() => _TimerWidgetState();
@@ -27,11 +26,16 @@ class _TimerWidgetState extends State<TimerWidget> {
 
   void _startTimer() {
     if (_timer != null && _timer!.isActive) return;
+    if (timeLeft == 0) return;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        timeLeft--;
-      });
+      if (timeLeft > 0) {
+        setState(() {
+          timeLeft--;
+        });
+      } else {
+        _timer?.cancel();
+      }
     });
   }
 
@@ -60,16 +64,32 @@ class _TimerWidgetState extends State<TimerWidget> {
 
     return Consumer<TimerModel>(
       builder: (context, timerModel, child) {
-        if (progress == 0 && timerModel.sessionType == SessionType.pomo && timerModel.pomoQuantity < 4) {
-          timerModel.sessionType = SessionType.relaxed;
-          timeLeft = 20;
-          _startTimer();
-        } else if ( progress == 0 && timerModel.sessionType == SessionType.relaxed ) {
+        debugPrint("pomoQuantity${timerModel.pomoQuantity}");
+        debugPrint("relaxedQuantity${timerModel.relaxedQuantity.toString()}");
+        if (progress == 0 && timerModel.sessionType == SessionType.pomo && timerModel.pomoQuantity <= 4)  {
+            if(timerModel.relaxedQuantity == 3) {
+              timerModel.pomoQuantity++;
+            } else {
+              timerModel.sessionType = SessionType.relaxed;
+              timerModel.pomoQuantity++;
+              timeLeft = 5;
+              _startTimer();
+            }
+
+            if(timerModel.pomoQuantity == 4) {
+              timerModel.sessionType = SessionType.long_relaxed;
+              timeLeft = 15;
+              _startTimer();
+            }
+        }
+        else if ( progress == 0 && timerModel.sessionType == SessionType.relaxed && timerModel.relaxedQuantity < 3) {
           timerModel.sessionType = SessionType.pomo;
-          timeLeft = 20;
+          timerModel.relaxedQuantity++;
+          timeLeft = 15;
           _startTimer();
         }
         else if (progress == 0) {
+          timeLeft = 0;
           _timer?.cancel();
         }
 
@@ -110,7 +130,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                 height: 64,
                 width: 100,
               ),
-              // TraceWidget(),
+              TraceWidget(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

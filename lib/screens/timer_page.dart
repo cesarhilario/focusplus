@@ -11,7 +11,7 @@ class TimerPage extends StatelessWidget {
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [TimerWidget(initialTime: 120)],
+          children: [TimerWidget()],
         ),
       ),
     ));

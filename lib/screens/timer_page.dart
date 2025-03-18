@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:focusplus/widgets/timer_widget.dart';
+import 'package:provider/provider.dart';
+
+import '../models/timer_model.dart';
 
 class TimerPage extends StatelessWidget {
   const TimerPage({super.key});
@@ -11,7 +14,9 @@ class TimerPage extends StatelessWidget {
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [TimerWidget()],
+          children: [Consumer<TimerModel>(
+              builder: (context, timerModel, child) { return TimerWidget(initialTime: timerModel.pomoTime,);})
+          ],
         ),
       ),
     ));

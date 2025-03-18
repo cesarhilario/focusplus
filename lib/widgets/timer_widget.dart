@@ -7,11 +7,14 @@ import 'dart:async';
 import '../models/timer_model.dart';
 
 class TimerWidget extends StatefulWidget {
-  int initialTime = 15;
+  final int initialTime;
+
+  TimerWidget({required this.initialTime});
 
   @override
   _TimerWidgetState createState() => _TimerWidgetState();
 }
+
 
 class _TimerWidgetState extends State<TimerWidget> {
   late int timeLeft;
@@ -24,11 +27,19 @@ class _TimerWidgetState extends State<TimerWidget> {
     timeLeft = widget.initialTime;
   }
 
-  void _startTimer() {
+  void _startTimer(TimerModel timerModel) {
     if (_timer != null && _timer!.isActive) return;
+    if(timerModel.pomoQuantity == 4 && timerModel.relaxedQuantity == 3){
+      timerModel.sessionType = SessionType.relaxed;
+      timeLeft = timerModel.pomoTime;
+      timerModel.pomoQuantity = 0;
+      timerModel.relaxedQuantity = 0;
+
+    }
     if (timeLeft == 0) return;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+
       if (timeLeft > 0) {
         setState(() {
           timeLeft--;
@@ -65,28 +76,28 @@ class _TimerWidgetState extends State<TimerWidget> {
     return Consumer<TimerModel>(
       builder: (context, timerModel, child) {
         debugPrint("pomoQuantity${timerModel.pomoQuantity}");
-        debugPrint("relaxedQuantity${timerModel.relaxedQuantity.toString()}");
+        debugPrint("relaxedQuantity${timerModel.relaxedQuantity}");
         if (progress == 0 && timerModel.sessionType == SessionType.pomo && timerModel.pomoQuantity <= 4)  {
-            if(timerModel.relaxedQuantity == 3) {
-              timerModel.pomoQuantity++;
-            } else {
+          timerModel.pomoQuantity++;
+            if (timerModel.pomoQuantity >= 1){
               timerModel.sessionType = SessionType.relaxed;
-              timerModel.pomoQuantity++;
-              timeLeft = 5;
-              _startTimer();
+              timeLeft = timerModel.relaxedTime;
+              _startTimer(timerModel);
             }
 
             if(timerModel.pomoQuantity == 4) {
               timerModel.sessionType = SessionType.long_relaxed;
-              timeLeft = 15;
-              _startTimer();
+              timeLeft = timerModel.longRelaxedTime;
+              _startTimer(timerModel);
             }
         }
         else if ( progress == 0 && timerModel.sessionType == SessionType.relaxed && timerModel.relaxedQuantity < 3) {
           timerModel.sessionType = SessionType.pomo;
-          timerModel.relaxedQuantity++;
-          timeLeft = 15;
-          _startTimer();
+          if(timerModel.pomoQuantity >= 1) {
+            timerModel.relaxedQuantity++;
+          }
+          timeLeft = timerModel.pomoTime;
+          _startTimer(timerModel);
         }
         else if (progress == 0) {
           timeLeft = 0;
@@ -156,7 +167,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                     margin: const EdgeInsets.all(24.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        _startTimer();
+                        _startTimer(timerModel);
                       },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromRGBO(102, 76, 255, 1),

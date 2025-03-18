@@ -5,7 +5,7 @@ enum SessionType { pomo, relaxed, long_relaxed }
 class TimerModel extends ChangeNotifier {
   final int pomoTime = 1500;
   final int relaxedTime = 300;
-  final int longTime = 1800;
+  final int longRelaxedTime = 1800;
 
   SessionType _sessionType = SessionType.pomo;
   int _pomoQuantity = 0;
